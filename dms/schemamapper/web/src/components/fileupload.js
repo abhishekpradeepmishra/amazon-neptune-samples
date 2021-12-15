@@ -48,14 +48,20 @@ function FileUpload() {
     const [columnList, setColumnList] = useState([]);
     const [vertices, setVertices] = useState([]);
     const [edges, setEdges] = useState([]);
-
-
     const [pageRefresh, setPageReferesh] = useState(false);
+    const [currentVertex, setCurrentVertex] = useState({});
+    const [currentEdge, setCurrentEdge] = useState({});
 
+    const [vertexdefinitions, setVertexdefinitions] = useState([]);
+    const [currentVertexIDTemplate, setcurrentVertexIDTemplate] = useState("");
 
+    const [currentEdgeV1Template, setCurrentEdgeV1Template] = useState("[from_vertex]");
+    const [currentEdgeV2Template, setCurrentEdgeV2Template] = useState("[to_vertex]");
 
+    const [currentEdgeV1Definition, setCurrentEdgeV1Definition] = useState("");
+    const [currentEdgeV2Definition, setCurrentEdgeV2Definition] = useState("");
 
-    const [currentVertex, setCurrentVertex] = useState();
+    const [finalMapping, setFinalMapping] = useState({ "rules": [] });
 
     function arrayToTree(array) {
         var root = {
@@ -163,7 +169,7 @@ function FileUpload() {
         // }
     };
 
-    function cancelAddNewVertex(){
+    function cancelAddNewVertex() {
         setCurrentVertex({});
         setShowNewVertex(false);
     }
@@ -174,58 +180,217 @@ function FileUpload() {
         var vertextable = formVTables.options[formVTables.selectedIndex].text;
         var propertyMappings = [];
 
-        currentVertex.attributes.forEach((item, index) => {
-            var propertyValueTemplate = document.getElementById(currentVertex.id + "-propertyValueTemplate-" + index);
-            var vertexpropertyTemplate= propertyValueTemplate.options[propertyValueTemplate.selectedIndex].text;
-            var vertexpropertyType= propertyValueTemplate.options[propertyValueTemplate.selectedIndex].type;
+        if (currentVertex.attributes !== undefined) {
+            currentVertex.attributes.forEach((item, index) => {
+                var propertyValueTemplate = document.getElementById(currentVertex.id + "-propertyValueTemplate-" + index);
+                var vertexpropertyTemplate = propertyValueTemplate.options[propertyValueTemplate.selectedIndex].text;
+                var vertexpropertyType = propertyValueTemplate.options[propertyValueTemplate.selectedIndex].attributes["type"].value;
 
-            var vertexpropertyName = document.getElementById(currentVertex.id + "-propertyName-"+ index).value;
-            
-            propertyMappings.push({
-                property_value_template: vertexpropertyTemplate,
-                property_name: vertexpropertyName,
-                property_value_type: vertexpropertyType
-            });
+                var vertexpropertyName = document.getElementById(currentVertex.id + "-propertyName-" + index).value;
 
-        })
+                propertyMappings.push({
+                    property_value_template: "{property_vale_template}".replace("property_vale_template", vertexpropertyTemplate),
+                    property_name: vertexpropertyName,
+                    property_value_type: getGraphPropertyType(vertexpropertyType)
+                });
 
-        var propertyId = propertyMappings.find(property => (property.Name === "id"));
+            })
+        }
 
-        setVertices([{
+        // var propertyId = propertyMappings.find(property => (property.property_name === "id"));
+
+        if (currentVertexIDTemplate === undefined) {
+            alert("Vertex Id template not defined");
+            return;
+        }
+
+        var nv = {
             "rule_id": uuidv4(),
             "rule_name": "vertex_mapping_rule_from_nodes" + uuidv4(),
             "table_name": vertextable,
             "vertex_definitions": [
                 {
-                    "vertex_id_template": "{vertex_id}".replace("vertex_id", propertyId),
+                    "vertex_id_template": "{vertex_id_template}".replace("vertex_id_template", currentVertexIDTemplate),
                     "vertex_label": vertexlabel,
-                    "vertex_definition_id": uuidv4(),
-                    "vertex_properties": propertyMappings
+                    "vertex_definition_id": uuidv4()
                 }
             ]
-        }, ...vertices]);
+        };
+
+        if (propertyMappings.length > 0) {
+            nv.vertex_definitions[0].vertex_properties = propertyMappings;
+        }
+
+        setVertices((vertices) => {
+            var newvertices = [nv, ...vertices]
+            return newvertices;
+        });
+
+        setVertexdefinitions((vertexdefinitions) => {
+            var newvertexdefinitions = nv.vertex_definitions.concat(vertexdefinitions);
+            return newvertexdefinitions;
+        });
+
+        setFinalMapping((finalMapping) => {
+            finalMapping.rules.push(nv);
+
+            return finalMapping;
+        });
+
+        console.log(nv.vertex_definitions);
+        console.log(vertexdefinitions);
 
         setCurrentVertex({});
         setShowNewVertex(false);
     }
 
-    function addNewVertexAttribute(e, vertexid) {
-        //var vertex = vertices.find(vertex => (vertex.id === vertexid));
-        //vertex.attributes.push({});
-        // var vertex = {
-        //     label: "",
-        //     id: uuidv4(),
-        //     attributes: [{},{}]
-        // };
+    function cancelAddNewEdge() {
+        setCurrentEdge({});
+        setShowNewEdge(0);
 
+        setCurrentEdgeV1Template("[from_vertex]")
+        setCurrentEdgeV2Template("[to_vertex]");
+        setCurrentEdgeV1Definition("");
+        setCurrentEdgeV2Definition("");
+    }
+
+    function SaveNewEdgeMapping(e) {
+
+        var edgelabel = document.getElementById("formELabel").value;
+        var formVTables = document.getElementById("formETables");
+        var edgetable = formVTables.options[formVTables.selectedIndex].text;
+        var propertyMappings = [];
+
+        if (currentEdge.attributes !== undefined) {
+            currentEdge.attributes.forEach((item, index) => {
+                var propertyValueTemplate = document.getElementById(currentEdge.id + "-propertyValueTemplate-" + index);
+                var edgepropertyTemplate = propertyValueTemplate.options[propertyValueTemplate.selectedIndex].text;
+                var edgepropertyType = propertyValueTemplate.options[propertyValueTemplate.selectedIndex].attributes["type"].value;
+
+                var vertexpropertyName = document.getElementById(currentEdge.id + "-attributepropertyName-" + index).value;
+
+                propertyMappings.push({
+                    property_value_template: "{property_value_template}".replace("property_value_template", edgepropertyTemplate),
+                    property_name: vertexpropertyName,
+                    property_value_type: getGraphPropertyType(edgepropertyType)
+                });
+
+            })
+        }
+
+        // var propertyId = propertyMappings.find(property => (property.property_name === "id"));
+
+        // if (propertyId === undefined) {
+        //     alert("Id attribute not defined on node/edge");
+        //     return;
+        // }
+
+        var ne = {
+            "rule_id": uuidv4(),
+            "rule_name": "edge_mapping_rule" + uuidv4(),
+            "table_name": edgetable,
+            "edge_definitions": [
+                {
+                    "from_vertex": {
+                        "vertex_id_template": currentEdgeV1Template,
+                        "vertex_definition_id": currentEdgeV1Definition,
+                    },
+                    "to_vertex": {
+                        "vertex_id_template": currentEdgeV2Template,
+                        "vertex_definition_id": currentEdgeV2Definition,
+                    },
+                    "edge_id_template": {
+                        "label": edgelabel,
+                        "template": currentEdgeV1Template + "-" + currentEdgeV2Template
+                    }
+                }
+            ]
+        };
+
+        if (propertyMappings.length > 0) {
+            ne.edge_definitions.edge_properties = propertyMappings;
+        }
+
+        setEdges((edges) => {
+            var newedges = [ne, ...edges]
+            return newedges;
+        });
+
+        setFinalMapping((finalMapping) => {
+            finalMapping.rules.push(ne);
+            return finalMapping;
+        });
+
+        setCurrentEdge({});
+        setShowNewEdge(false);
+    }
+
+    function getGraphPropertyType(sqltype) {
+
+        if (sqltype.indexOf("varchar") !== -1) {
+            sqltype = "varchar";
+        }
+
+        switch (sqltype) {
+            case "bigint":
+                return "Long";
+            case "varchar":
+                return "String";
+            case "text":
+                    return "String";
+            default:
+                return "String";
+        }
+    }
+
+    function addNewVertexAttribute(e, vertexid) {
         var vertex = JSON.parse(JSON.stringify(currentVertex));
+
+        if (vertex.attributes === undefined)
+            vertex.attributes = []
+
         vertex.attributes.push({ key: "", value: "" })
 
         setCurrentVertex(vertex);
     }
 
+
+    function addNewEdgeAttribute(e, vertexid) {
+        var edge = JSON.parse(JSON.stringify(currentEdge));
+
+        if (edge.attributes === undefined)
+            edge.attributes = []
+
+
+        edge.attributes.push({ key: "", value: "" })
+
+        setCurrentEdge(edge);
+    }
+
     function addNewEdge(e) {
-        // setShowNewEdge(true)
+        setCurrentEdge({
+            "id": uuidv4(),
+            "label": "",
+            "mandatoryattributes": [
+                { key: "from_vertex", value: "" },
+                { key: "to_vertex", value: "" },
+                { key: "edge_id_template", value: "" }
+            ]
+        })
+        setShowNewEdge(true);
+        setShowNewVertex(false);
+    }
+
+    function addNewVertex(e) {
+        setCurrentVertex({
+            "id": uuidv4(),
+            "label": "",
+            "mandatoryattributes": [
+                { key: "vertex_id_template", value: "" }
+            ]
+        })
+        setShowNewVertex(true);
+        setShowNewEdge(false);
     }
 
     function updateColumList(e) {
@@ -234,149 +399,382 @@ function FileUpload() {
 
         var columns = state.root.tables.find(table => (table.name === tableName)).columns;
         setColumnList(columns);
+    }
 
-        var vertex = {
-            label: "",
-            id: uuidv4(),
-            attributes: [{ key: "id", value: "" }]
-        };
+    function updateColumListE(e) {
+        var formETables = document.getElementById("formETables");
+        var tableName = formETables.options[formETables.selectedIndex].text;
 
-        setCurrentVertex(vertex);
-        // setVertices([vertex, ...vertices])
+        var columns = state.root.tables.find(table => (table.name === tableName)).columns;
+        setColumnList(columns);
+    }
+
+    function setVertexTemplate(e, attributekey, param1, param2, param3) {
+
+        //-vertexdefinition-
+        //-vertexidtemplate-
+        var element = document.getElementById(param1 + param2 + param3);
+        var elementvalue = element.options[element.selectedIndex].value;
+
+  //  alert(elementvalue);
+        setcurrentVertexIDTemplate(elementvalue);
+    }
+
+    function setEdgeTemplate(e, attributekey, param1, param2, param3) {
+
+        //-vertexdefinition-
+        //-vertexidtemplate-
+        var element = document.getElementById(param1 + param2 + param3);
+        var elementvalue = element.options[element.selectedIndex].value;
+
+        if (attributekey === "from_vertex") {
+            if (param2 === "-vertexdefinition-") {
+                setCurrentEdgeV1Definition(elementvalue)
+            }
+            else {
+                setCurrentEdgeV1Template("{template}".replace("template", elementvalue))
+            }
+        }
+
+        if (attributekey === "to_vertex") {
+            if (param2 === "-vertexdefinition-") {
+                setCurrentEdgeV2Definition(elementvalue)
+
+            } else {
+                setCurrentEdgeV2Template("{template}".replace("template", elementvalue))
+            }
+        }
+
     }
 
     return (
 
         <Row>
             <Col>
-                <h1>
-                    Upload Schema for your database tables as csv
-                </h1>
-                <div>
-                    <input className="primary" type="file" onChange={e => onFileChange(e)} />
-                    {/* <button onClick={onFileUpload}>
+                <br />
+                <Row>
+
+                    <Col md={8}>
+                        <div>
+                            Upload Schema for your database tables as csv <a href="/sample_sql_schema.csv">(click to download mysql schema sample) </a>
+                        </div>
+                    </Col>
+                    <Col md={4}>
+                        <div>
+                            <input className="primary" type="file" onChange={e => onFileChange(e)} />
+                            {/* <button onClick={onFileUpload}>
                         Upload!
                     </button> */}
-                </div>
-                {fileData()}
-                <hr />
-                <Row>
-                    <Col md={3}>
-                        <Card>
-                            <Card.Title>
-                                SQL Schema
-                            </Card.Title>
-                            <Card.Body>
-                                {state.root?.tables?.map((table, index) => (
-                                    <div>
-                                        <h3>{table.name}</h3>
-                                        <div>
-                                            {table.columns?.map((column, index) => (
-                                                <div className="tree-depth-1">
-                                                    <div><b>{column.name}</b>, {column.type}, {column.isnullable}</div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                ))}
-                            </Card.Body>
-                        </Card>
-                    </Col>
-                    <Col>
-                        <Card>
-                            <Card.Title>
-                                Graph Mappings
-                            </Card.Title>
-                            <Card.Body>
-                                <div className="alignRight">
-                                    <Button variant="primary" onClick={e => setShowNewVertex(true)}>Add Vertex</Button> &nbsp; <Button variant="primary">Add Edge</Button>
-                                </div>
-
-                                <div>
-                                    {showNewVertex > 0 &&
-                                        <Card>
-                                            <Card.Title>
-                                                New Vertex
-                                            </Card.Title>
-                                            <Card.Body>
-                                                <div className="NCForm">
-                                                    <Form>
-                                                        <Form.Group className="mb-3" controlId="formVLabel">
-                                                            <Form.Label>Label</Form.Label>
-                                                            <Form.Control type="text" placeholder="Enter title" />
-                                                            <Form.Text className="text-muted">
-                                                                Enter Label as per graph model
-                                                            </Form.Text>
-                                                        </Form.Group>
-                                                        <Form.Group className="mb-1" controlId="formVTables">
-                                                            <Form.Label>Column name</Form.Label>
-                                                            <Form.Select aria-label="Default select example" onChange={e => updateColumList(e)}>
-                                                                <option>Select table</option>
-                                                                {tableList.map((table, index) => (
-                                                                    <option>{table.name}</option>
-                                                                ))}
-                                                            </Form.Select>
-
-                                                            <Form.Text className="text-muted">
-                                                                Select Table Or Vertex
-                                                            </Form.Text>
-                                                        </Form.Group>
-                                                        {currentVertex !== undefined &&
-                                                            <Row>
-                                                                <Col class="rightAlign">
-                                                                    <Button variant="primary" onClick={e => addNewVertexAttribute(e, currentVertex?.id)}>new attribute</Button>
-                                                                </Col>
-                                                            </Row>
-                                                        }
-
-                                                        {currentVertex?.attributes?.map((attribute, index) => (
-                                                            <Row>
-                                                                <Col>
-                                                                    <Form.Group className="mb-1" controlId={currentVertex?.id + "-propertyValueTemplate-" + index}>
-                                                                        <Form.Select aria-label="Default select example">
-                                                                            <option>Select Column</option>
-                                                                            {columnList?.map((column, columnIndex) => (
-                                                                                <option type={column.type}>{column.name}</option>
-                                                                            ))}
-                                                                        </Form.Select>
-                                                                        <Form.Text className="text-muted">
-                                                                            Select Column Or Vertex Attribute
-                                                                        </Form.Text>
-                                                                    </Form.Group>
-                                                                </Col>
-
-                                                                <Col>
-                                                                    <Form.Control controlId={currentVertex?.id + "-propertyName-" + index} type="text" placeholder="Enter title"></Form.Control>
-                                                                </Col>
-                                                            </Row>
-                                                        ))}
-                                                        <Button variant="primary" type="button" onClick={e => SaveNewVertexMapping(e)}>
-                                                            Add
-                                                        </Button>
-                                                        &nbsp;
-                                                        <Button variant="primary" type="button" onClick={e => cancelAddNewVertex(e)}>
-                                                            Cancel
-                                                        </Button>
-                                                    </Form>
-                                                </div>
-                                            </Card.Body>
-                                        </Card>
-                                    }
-                                </div>
-                            </Card.Body>
-                        </Card>
-                    </Col>
-                    <Col>
-                        <Card>
-                            <Card.Title>
-                                Graph Template
-                            </Card.Title>
-                            <Card.Body>
-                            </Card.Body>
-                        </Card>
+                        </div>
+                        {fileData()}
                     </Col>
                 </Row>
+                <hr />
 
+                <Row>
+                    <Col md={3}>
+                        <Row>
+                            <Col>
+                                SQL Schema
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col>
+                                <Card>
+                                    <Card.Title>
+                                        {/* SQL Schema */}
+                                    </Card.Title>
+                                    <Card.Body>
+                                        {state.root?.tables?.map((table, index) => (
+                                            <div>
+                                                <h3>{table.name}</h3>
+                                                <div>
+                                                    {table.columns?.map((column, index) => (
+                                                        <div className="tree-depth-1">
+                                                            <div><b>{column.name}</b>, {column.type}, {column.isnullable}</div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </Card.Body>
+                                </Card>
+                            </Col>
+                        </Row>
+
+                    </Col>
+                    <Col>
+                        <Row>
+                            <Col>
+                                Graph Mappings
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col>
+                                <Card>
+                                    <Card.Title>
+                                        {/* Graph Mappings */}
+                                    </Card.Title>
+                                    <Card.Body>
+                                        <div className="alignRight">
+                                            <Button variant="primary" onClick={e => addNewVertex(e)}>Add Vertex</Button> &nbsp; <Button variant="primary" onClick={e => addNewEdge(e)}>Add Edge</Button>
+                                        </div>
+
+                                        <div>
+                                            {showNewVertex > 0 &&
+                                                <Card>
+                                                    <Card.Title>
+                                                        New Vertex
+                                                    </Card.Title>
+                                                    <Card.Body>
+                                                        <div className="NCForm">
+                                                            <Form>
+                                                                <Form.Group className="mb-3" controlId="formVLabel">
+                                                                    <Form.Label>vertex label</Form.Label>
+                                                                    <Form.Control type="text" placeholder="Enter title" />
+                                                                    {/* <Form.Text className="text-muted">
+                                                                        Enter Label as per graph model
+                                                                    </Form.Text> */}
+                                                                </Form.Group>
+                                                                <Form.Group className="mb-1" controlId="formVTables">
+                                                                    <Form.Label>sql table to refer</Form.Label>
+                                                                    <Form.Select aria-label="Default select example" onChange={e => updateColumList(e)}>
+                                                                        <option>Select table</option>
+                                                                        {tableList.map((table, index) => (
+                                                                            <option>{table.name}</option>
+                                                                        ))}
+                                                                    </Form.Select>
+
+                                                                    {/* <Form.Text className="text-muted">
+                                                                        Select table_name
+                                                                    </Form.Text> */}
+                                                                </Form.Group>
+
+
+                                                                {currentVertex?.mandatoryattributes?.map((attribute, index) => (
+                                                                    <Row>
+                                                                        <Col>
+                                                                            {/* <Form.Control ></Form.Control> */}
+                                                                            <label id={currentVertex?.id + "-propertyName1-" + index} type="label">{attribute?.key}</label>
+                                                                        </Col>
+                                                                        <Col>
+                                                                            {/* {attribute?.key !== "edge_id_template" && */}
+                                                                            <Form.Group className="mb-1" controlId={currentVertex?.id + "-vertexidtemplate-" + index} onChange={e => setVertexTemplate(e, attribute?.key, currentVertex?.id, "-vertexidtemplate-", index)}>
+                                                                                <Form.Select aria-label="Default select example">
+                                                                                    <option>Select table column</option>
+                                                                                    {columnList?.map((column, columnIndex) => (
+                                                                                        <option type={column.type} value={column.name}>{column.name}</option>
+                                                                                    ))}
+                                                                                </Form.Select>
+                                                                            </Form.Group>
+                                                                            {/* } */}
+                                                                        </Col>
+                                                                    </Row>
+                                                                ))}
+                                                                <hr />
+                                                                {currentVertex !== undefined &&
+                                                                    <Row class="rightAlign">
+                                                                        <Col md="10"></Col>
+                                                                        <Col md="2">
+                                                                            <Button slot="end" variant="primary" onClick={e => addNewVertexAttribute(e, currentVertex?.id)}>add attribute</Button>
+                                                                        </Col>
+                                                                    </Row>
+                                                                }
+                                                                <hr />
+                                                                {currentVertex?.attributes?.map((attribute, index) => (
+                                                                    <Row>
+                                                                        <Col>
+                                                                            <Form.Group className="mb-1" controlId={currentVertex?.id + "-propertyValueTemplate-" + index}>
+                                                                                <Form.Select aria-label="Default select example">
+                                                                                    <option>Select Column</option>
+                                                                                    {columnList?.map((column, columnIndex) => (
+                                                                                        <option type={column.type}>{column.name}</option>
+                                                                                    ))}
+                                                                                </Form.Select>
+                                                                                <Form.Text className="text-muted">
+                                                                                    Select Column
+                                                                                </Form.Text>
+                                                                            </Form.Group>
+                                                                        </Col>
+
+                                                                        <Col>
+                                                                            <Form.Control id={currentVertex?.id + "-propertyName-" + index} type="text" placeholder="Enter title"></Form.Control>
+                                                                        </Col>
+                                                                    </Row>
+                                                                ))}
+                                                                <Button variant="primary" type="button" onClick={e => SaveNewVertexMapping(e)}>
+                                                                    Save
+                                                                </Button>
+                                                                &nbsp;
+                                                                <Button variant="primary" type="button" onClick={e => cancelAddNewVertex(e)}>
+                                                                    Cancel
+                                                                </Button>
+                                                            </Form>
+                                                        </div>
+                                                    </Card.Body>
+                                                </Card>
+                                            }
+
+                                            {showNewEdge > 0 &&
+                                                <Card>
+                                                    <Card.Title>
+                                                        New Edge
+                                                    </Card.Title>
+                                                    <Card.Body>
+                                                        <div className="NCForm">
+                                                            <Form>
+                                                                <Form.Group className="mb-3" controlId="formELabel">
+                                                                    <Form.Label>enter Label for edge</Form.Label>
+                                                                    <Form.Control type="text" placeholder="Enter title" />
+                                                                    {/* <Form.Text className="text-muted">
+                                                                        Enter Label as per graph model
+                                                                    </Form.Text> */}
+                                                                </Form.Group>
+                                                                <Form.Group className="mb-1" controlId="formETables">
+                                                                    <Form.Label>select table for edge</Form.Label>
+                                                                    <Form.Select aria-label="Default select example" onChange={e => updateColumListE(e)}>
+                                                                        <option>Select table</option>
+                                                                        {tableList.map((table, index) => (
+                                                                            <option>{table.name}</option>
+                                                                        ))}
+                                                                    </Form.Select>
+
+                                                                    {/* <Form.Text className="text-muted">
+                                                                        Select Table Or Vertex
+                                                                    </Form.Text> */}
+
+                                                                </Form.Group>
+                                                                <br />
+
+                                                                {currentEdge?.mandatoryattributes?.map((attribute, index) => (
+                                                                    <Row>
+                                                                        <Col>
+                                                                            {/* <Form.Control ></Form.Control> */}
+                                                                            <label id={currentEdge?.id + "-propertyName-" + index} type="label">{attribute?.key}</label>
+                                                                        </Col>
+                                                                        <Col>
+                                                                            {attribute?.key === "edge_id_template" &&
+
+                                                                                // <Form.Text className="text-muted">
+
+                                                                                // </Form.Text>
+                                                                                <div>
+                                                                                    <b>{currentEdgeV1Template}-{currentEdgeV2Template}</b>
+                                                                                    {/* <br />
+                                                                                    <h3>{currentEdgeV1Definition}-{currentEdgeV2Definition}</h3> */}
+                                                                                </div>
+                                                                            }
+                                                                            {attribute?.key !== "edge_id_template" &&
+                                                                                <Form.Group className="mb-1" controlId={currentEdge?.id + "-vertexdefinition-" + index} onChange={e => setEdgeTemplate(e, attribute?.key, currentEdge?.id, "-vertexdefinition-", index)}>
+                                                                                    <Form.Select aria-label="Default select example">
+                                                                                        <option>Select vertex definition</option>
+                                                                                        {vertexdefinitions?.map((column, columnIndex) => (
+                                                                                            <option value={column.vertex_definition_id}>{"VertexDefinition-" + column.vertex_definition_id}-{column.vertex_id_template}-{column.vertex_label}</option>
+                                                                                        ))}
+                                                                                    </Form.Select>
+                                                                                </Form.Group>
+                                                                            }
+                                                                            {/* <Form.Text className="text-muted">
+                                                                                Select Column Or Vertex Attribute
+                                                                            </Form.Text> */}
+                                                                            {/* } */}
+                                                                        </Col>
+                                                                        <Col>
+                                                                            {/* <Row>
+                                                                                <Col>
+                                                                                    <Form.Text className="text-muted">
+                                                                                        Select table column 
+                                                                                    </Form.Text>
+                                                                                </Col>
+                                                                            </Row> */}
+                                                                            <Row>
+                                                                                <Col>
+                                                                                    {attribute?.key !== "edge_id_template" &&
+                                                                                        <Form.Group className="mb-1" controlId={currentEdge?.id + "-vertexidtemplate-" + index} onChange={e => setEdgeTemplate(e, attribute?.key, currentEdge?.id, "-vertexidtemplate-", index)}>
+                                                                                            <Form.Select aria-label="Default select example">
+                                                                                                <option>Select table column</option>
+                                                                                                {columnList?.map((column, columnIndex) => (
+                                                                                                    <option type={column.type} value={column.name}>{column.name}</option>
+                                                                                                ))}
+                                                                                            </Form.Select>
+                                                                                        </Form.Group>
+                                                                                    }
+                                                                                </Col>
+                                                                            </Row>
+                                                                        </Col>
+                                                                    </Row>
+                                                                ))}
+
+                                                                <br />
+
+                                                                {currentEdge !== undefined &&
+
+                                                                    <Row class="rightAlign">
+                                                                        <Col md="10"></Col>
+                                                                        <Col md="2">
+                                                                            <Button slot="end" variant="primary" onClick={e => addNewEdgeAttribute(e, currentEdge?.id)}>add attribute</Button>
+                                                                        </Col>
+                                                                    </Row>
+                                                                }
+                                                                <hr />
+
+                                                                {currentEdge?.attributes?.map((attribute, index) => (
+                                                                    <Row>
+
+                                                                        <Col>
+                                                                            <Form.Group className="mb-1" controlId={currentEdge?.id + "-propertyValueTemplate-" + index}>
+                                                                                <Form.Select aria-label="Default select example">
+                                                                                    <option>Select Column</option>
+                                                                                    {columnList?.map((column, columnIndex) => (
+                                                                                        <option type={column.type}>{column.name}</option>
+                                                                                    ))}
+                                                                                </Form.Select>
+
+                                                                            </Form.Group>
+                                                                        </Col>
+                                                                        <Col>
+                                                                            <Form.Control id={currentEdge?.id + "-attributepropertyName-" + index} type="text" placeholder="enter property name"></Form.Control>
+                                                                        </Col>
+                                                                    </Row>
+                                                                ))}
+                                                                <Button variant="primary" type="button" onClick={e => SaveNewEdgeMapping(e)}>
+                                                                    Save
+                                                                </Button>
+                                                                &nbsp;
+                                                                <Button variant="primary" type="button" onClick={e => cancelAddNewEdge(e)}>
+                                                                    Cancel
+                                                                </Button>
+                                                            </Form>
+                                                        </div>
+                                                    </Card.Body>
+                                                </Card>
+                                            }
+                                        </div>
+                                    </Card.Body>
+                                </Card>
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col>
+                                Generated Graph Template (copy and format)
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col>
+                                <Card>
+                                    <Card.Title>
+                                        {/* Graph Template */}
+                                    </Card.Title>
+                                    <Card.Body>
+                                        {/* <textarea class="ace_text-input" id="myTextarea" width="100%" autocorrect="off" autocapitalize="none" spellcheck="false" wrap="off"></textarea> */}
+                                        <pre>{JSON.stringify(finalMapping,null,2)} </pre>
+                                       
+                                    </Card.Body>
+                                </Card>
+                            </Col>
+                        </Row>
+                    </Col>
+                </Row>
             </Col>
         </Row>
     );

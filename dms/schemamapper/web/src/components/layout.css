@@ -32,3 +32,19 @@
   border-color: #1e1f20;
   margin:0.25rem;
 }
+
+
+
+
+.rightAlign{
+  padding: 0.1rem;
+  text-align: right !important;
+}
+
+.navbarcenter{
+  text-align: center;
+  padding: 0.25rem;
+  background-color: rgb(5, 52, 99);
+  color: #1e1f20;
+  font-size: x-large;
+}

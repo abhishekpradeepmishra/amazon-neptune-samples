@@ -45,9 +45,9 @@ export default function Layout({ children, home, login }) {
         window.location.href = "/"
     }
     return (
-        <div className={styles.container}>
-            <Navbar bg="dark" expand="lg" variant="dark">
-                <Navbar.Brand href="/">
+        <div>
+            <div class="navbarcenter">
+                {/* <Navbar.Brand href="/">
                     <Nav.Link href="/">
                         <Image
                             priority
@@ -59,50 +59,22 @@ export default function Layout({ children, home, login }) {
                         />
                     </Nav.Link>
 
-                </Navbar.Brand>
-                <Navbar.Text>
-                    <span className="bannerText">Schema mapper</span>
-                </Navbar.Text>
-                <Navbar.Toggle aria-controls="navbarScroll" />
-                {/* <Nav.Link href="#" disabled>
-                    Link
-                </Nav.Link> */}
-                <Navbar.Collapse id="navbarScroll">
+                </Navbar.Brand> */}
+                {/* <Navbar.Text> */}
+                    <span className="bannerText">&nbsp; Utility to create DMS Graph Schema Mapping for Property Graph in Amazon Neptune</span>
+                {/* </Navbar.Text> */}
+                {/* <Navbar.Toggle aria-controls="navbarScroll" /> */}
+                {/* <Navbar.Collapse id="navbarScroll">
                     <Nav
                         className="mr-auto my-2 my-lg-0"
                         style={{ maxHeight: '100px' }}
                         navbarScroll
                     >
-                        {/* <Nav.Link href="#action1">Home</Nav.Link>
-                        <Nav.Link href="#action2">Link</Nav.Link>
-                        <NavDropdown title="Link" id="navbarScrollingDropdown">
-                            <NavDropdown.Item href="#action3">Action</NavDropdown.Item>
-                            <NavDropdown.Item href="#action4">Another action</NavDropdown.Item>
-                            <NavDropdown.Divider />
-                            <NavDropdown.Item href="#action5">Something else here</NavDropdown.Item>
-                        </NavDropdown>
-                        <Nav.Link href="#" disabled>
-                            Link
-                        </Nav.Link> */}
 
                     </Nav>
 
-                    {/* <Form className="d-flex justify-content-end">
-                        <FormControl
-                            type="search"
-                            placeholder="Search"
-                            className="mr-2"
-                            aria-label="Search"
-                        />
-                        <Button variant="outline-success">Search</Button>
-                    </Form> */}
+                   
                     <Nav className="w-100 justify-content-end">
-
-                        {/* {!login && (
-                                    <BannerLogin ></BannerLogin>
-                            )} */}
-
-                        {/* <BannerLogin ></BannerLogin> */}
 
                         <Nav.Item>
                             <Nav.Link eventKey="disabled" disabled>
@@ -110,9 +82,9 @@ export default function Layout({ children, home, login }) {
                         </Nav.Item>
                     </Nav>
 
-                </Navbar.Collapse>
+                </Navbar.Collapse> */}
 
-            </Navbar>
+            </div>
             <Container>
                 <Row>
                     {/* <Col md={2}>
@@ -164,9 +136,9 @@ export default function Layout({ children, home, login }) {
             <hr />
             <footer class="footer">
                 <div class="container">
-                    <p> &copy; 2021 Neptune Developer
+                    <p> &copy; 2021 Neptune developer
                         <br />
-                        <a href="mailto:neptune-developer-feedbac@amazon.com">neptune-developer-feedback@amazon.com</a>
+                        <a href="mailto:neptune-developer-feedbac@amazon.com">neptune-developer@abc.com</a>
                     </p>
                 </div>
             </footer>

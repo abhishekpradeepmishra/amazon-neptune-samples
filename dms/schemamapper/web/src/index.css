@@ -49,14 +49,14 @@ footer {
   
 }
 
-#loginForm{
+/* #loginForm{
   text-align: right;
   padding-top: 5rem !important;
   background-image: url('./assets/kraken.png');
   background-repeat: no-repeat;
   background-position: top;
   background-size: 15%;
-}
+} */
 
 
 .bannerText {
@@ -140,11 +140,6 @@ footer {
   margin-top: 1rem;
 }
   
-
-.rightAlign{
-  padding: 0.1rem;
-  text-align: right;
-}
 
 
 .btn-primary{

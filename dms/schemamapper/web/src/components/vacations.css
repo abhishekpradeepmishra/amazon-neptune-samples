@@ -4,9 +4,9 @@ body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen, Ubuntu,
     Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
-  line-height: 1.6;
+  line-height: 1.6; 
   font-size: 14px;
-  background-color: #c5d9e9 !important;
+  background-color: #d1d1d3 !important;
 }
 
 * {
@@ -111,7 +111,7 @@ footer {
   color: #666;
 }
 .card {
-  background-color: #bfcbec !important;
+  background-color: #ffffff !important;
 }
 
 
