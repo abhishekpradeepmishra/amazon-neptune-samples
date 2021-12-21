@@ -4,19 +4,11 @@ import {
 } from 'react-bootstrap';
 import React, { useState, useEffect } from 'react';
 import { Auth } from 'aws-amplify';
-import './bannerlogin.module.css'
-
-
 import {
     BrowserRouter as Router,
-    Switch,
-    Route,
-    // Link,
-    Redirect,
     useHistory,
     useLocation
 } from "react-router-dom";
-
 
 export default function BannerLogin() {
 

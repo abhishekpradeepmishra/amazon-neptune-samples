@@ -1,6 +1,4 @@
-import styles from './layout.css'
 import { Navbar, Nav, NavDropdown, Form, FormControl, Button, Image, Container, Row, Col, Card, ListGroup } from 'react-bootstrap';
-import 'bootstrap/dist/css/bootstrap.min.css';
 import Amplify, { Auth } from 'aws-amplify';
 import React, { useState, useEffect } from 'react';
 import BannerLogin from './bannerLogin';
@@ -15,10 +13,8 @@ import {
     useLocation
 } from "react-router-dom";
 
-import ChatBot from 'react-simple-chatbot';
-
-const name = 'Kraken3xplorer'
-export const siteTitle = 'Kraken3xplorer'
+const name = 'NeptuneUIUtils'
+export const siteTitle = 'NeptuneUIUtils'
 export default function Layout({ children, home, login }) {
     const history = useHistory()
     const [user, setUser] = useState({})
@@ -46,44 +42,38 @@ export default function Layout({ children, home, login }) {
     }
     return (
         <div>
-            <div class="navbarcenter">
-                {/* <Navbar.Brand href="/">
-                    <Nav.Link href="/">
-                        <Image
-                            priority
-                            src="/kraken.png"
-                            className="borderCircle"
-                            height={50}
-                            width={50}
-                            alt={name}
-                        />
-                    </Nav.Link>
-
-                </Navbar.Brand> */}
-                {/* <Navbar.Text> */}
-                    <span className="bannerText">&nbsp; Utility to create DMS Graph Schema Mapping for Property Graph in Amazon Neptune</span>
-                {/* </Navbar.Text> */}
-                {/* <Navbar.Toggle aria-controls="navbarScroll" /> */}
-                {/* <Navbar.Collapse id="navbarScroll">
-                    <Nav
-                        className="mr-auto my-2 my-lg-0"
-                        style={{ maxHeight: '100px' }}
-                        navbarScroll
-                    >
-
-                    </Nav>
-
-                   
-                    <Nav className="w-100 justify-content-end">
-
-                        <Nav.Item>
-                            <Nav.Link eventKey="disabled" disabled>
+            <div>
+                <Navbar bg="dark" expand="lg" variant='bg-primary'>
+                    <Container>
+                        <Navbar.Brand href="/">
+                            <Nav.Link href="/">
+                                <Image
+                                    priority
+                                    src="/neptune.png"
+                                    className="borderCircle"
+                                    height={50}
+                                    width={50}
+                                    alt={name}
+                                />
                             </Nav.Link>
-                        </Nav.Item>
-                    </Nav>
-
-                </Navbar.Collapse> */}
-
+                        </Navbar.Brand>
+                        <Navbar.Toggle aria-controls="basic-navbar-nav" />
+                        <Navbar.Collapse id="basic-navbar-nav">
+                            <Nav className="me-auto">
+                                {/* <Nav.Link href="/">Home</Nav.Link> */}
+                                <Nav.Link href="/">Schema-mapper</Nav.Link>
+                                <Nav.Link href="/gm">Graph-modeller</Nav.Link>
+                                {/* <NavDropdown title="Dropdown" id="basic-nav-dropdown">
+                                    <NavDropdown.Item href="#action/3.1">Action</NavDropdown.Item>
+                                    <NavDropdown.Item href="#action/3.2">Another action</NavDropdown.Item>
+                                    <NavDropdown.Item href="#action/3.3">Something</NavDropdown.Item>
+                                    <NavDropdown.Divider />
+                                    <NavDropdown.Item href="#action/3.4">Separated link</NavDropdown.Item>
+                                </NavDropdown> */}
+                            </Nav>
+                        </Navbar.Collapse>
+                    </Container>
+                </Navbar>
             </div>
             <Container>
                 <Row>
@@ -136,9 +126,11 @@ export default function Layout({ children, home, login }) {
             <hr />
             <footer class="footer">
                 <div class="container">
-                    <p> &copy; 2021 Neptune developer
+                    <p> for Neptune Developers
                         <br />
-                        <a href="mailto:neptune-developer-feedbac@amazon.com">neptune-developer@abc.com</a>
+                        by
+                        <br />
+                        <a href="mailto:neptune-developer-feedbac@amazon.com">neptune-uitools@amazon.com</a>
                     </p>
                 </div>
             </footer>

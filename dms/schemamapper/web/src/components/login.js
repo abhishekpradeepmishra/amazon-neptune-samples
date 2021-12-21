@@ -15,7 +15,6 @@ import {
 } from "react-router-dom";
 
 import Layout from './layout';
-import  './login.module.css'
 
 export default function SignUpOrSignIn() {
     //check whether use has signed in or not and return accordingly

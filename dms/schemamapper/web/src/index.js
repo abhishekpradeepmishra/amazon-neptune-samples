@@ -2,33 +2,28 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 import reportWebVitals from './reportWebVitals';
-import {
-  BrowserRouter as Router,
-  Switch,
-  Route,
-  Link
-} from "react-router-dom";
-
+import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
 import SignUpOrSignIn from './components/login'
-import Schemas from './components/schemas'
+import SchemaMapper from './components/schemamapper'
 import Home from './components/home'
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 ReactDOM.render(
   <Router>
     <Router>
-    <div>
-      <Route exact path="/">
-        {/* <Home /> */}
-        <Schemas/>
-      </Route>
-      {/* <Route path="/login">
-        <SignUpOrSignIn />
-      </Route> */}
-      <Route path="/connections/:connectionid">
-        <Schemas/>
-      </Route>
-    </div>
-  </Router>
+      <div>
+        <Route exact path="/">
+          <SchemaMapper />
+          {/* <Schemas/> */}
+        </Route>
+        {/* <Route path="/sm">
+          <SchemaMapper />
+        </Route> */}
+        <Route path="/login">
+          <SignUpOrSignIn />
+        </Route>
+      </div>
+    </Router>
   </Router >,
   document.getElementById('root')
 );
